@@ -6,43 +6,43 @@ import { useToast } from '../components/ToastProvider';
 const MOCK_TEAMS: Team[] = [
     {
         id: '1',
-        name: 'Yapay Zeka Destekli Sürdürülebilir Tarım',
-        area: 'Mühendislik',
-        description: 'Görüntü işleme teknikleri kullanılarak bitki hastalıklarının erken teşhisi ve verim analizi üzerine çalışıyoruz.',
+        name: 'Elif Demir',
+        area: 'Bilgisayar Mühendisliği',
+        description: 'Merhaba! Yapay zeka ve görüntü işleme üzerine çalışıyorum. 2209-A projemde sağlık alanında bir tanı sistemi geliştirmek istiyorum.',
         capacity: 5,
         currentMembers: 3,
         isTrending: true
     },
     {
         id: '2',
-        name: 'Dijital Okuryazarlık',
-        area: 'Sosyal Bilimler',
-        description: 'Lise öğrencilerinin sosyal medya kullanım alışkanlıklarının akademik başarıya etkisi üzerine bir araştırma.',
+        name: 'Mert Yılmaz',
+        area: 'Elektrik Elektronik Müh.',
+        description: 'IoT tabanlı akıllı tarım sistemleri üzerine bir proje fikrim var. Gömülü sistemler ve sensörler konusunda bilgiliyim.',
         capacity: 4,
         currentMembers: 1
     },
     {
         id: '3',
-        name: 'Akıllı Protez Tasarımı',
-        area: 'Sağlık',
-        description: 'Üst ekstremite ampütasyonları için düşük maliyetli, 3D yazıcı ile üretilebilir protez el tasarımı.',
+        name: 'Zeynep Kaya',
+        area: 'Psikoloji',
+        description: 'Eğitim teknolojileri ve öğrenme psikolojisi üzerine bir çalışma planlıyorum. Veri analizi konusunda desteğe ihtiyacım var.',
         capacity: 5,
         currentMembers: 4
     },
     {
         id: '4',
-        name: 'Otonom Drone Filosu',
-        area: 'Mühendislik',
-        description: 'Afet bölgelerinde arama kurtarma çalışmaları için koordine uçuş yapabilen drone sürüsü yazılımı.',
+        name: 'Can Ozturk',
+        area: 'Moleküler Biyoloji',
+        description: 'Kanser araştırmaları üzerine laboratuvar deneyimi olan biriyim. Biyoinformatik analizler için kodlama bilen arkadaş arıyorum.',
         capacity: 5,
         currentMembers: 4,
         urgent: true
     },
     {
         id: '5',
-        name: 'Yeşil Enerji Depolama',
-        area: 'Mühendislik',
-        description: 'Yenilenebilir enerji kaynakları için yeni nesil batarya yönetim sistemleri geliştiriyoruz.',
+        name: 'Burak Özkan',
+        area: 'Endüstri Mühendisliği',
+        description: 'Tedarik zinciri optimizasyonu üzerine bir simülasyon projesi yapıyorum. Arena veya AnyLogic bilen, süreç analizi yapabilen arkadaşlar arıyorum.',
         capacity: 3,
         currentMembers: 2
     }
@@ -69,12 +69,16 @@ export const JoinTeam: React.FC = () => {
 
     const handleJoinRequest = (teamId: string, teamName: string) => {
         setSentRequests(prev => new Set(prev).add(teamId));
-        showToast(`${teamName} ekibine katılım talebiniz iletildi.`, 'success');
+        showToast(`${teamName} ile iletişime geçildi.`, 'success');
     };
 
     const filteredTeams = MOCK_TEAMS.filter(team => {
         if (filter === 'Tümü') return true;
-        return team.area === filter;
+        // Simple mock filtering logic
+        if (filter === 'Mühendislik' && (team.area.includes('Mühendisliği') || team.area.includes('Müh.'))) return true;
+        if (filter === 'Sağlık' && (team.area.includes('Biyoloji') || team.area.includes('Tıp'))) return true;
+        if (filter === 'Sosyal Bilimler' && (team.area.includes('Psikoloji') || team.area.includes('Sosyoloji'))) return true;
+        return false;
     });
 
     const getInitials = (name: string) => {
@@ -92,15 +96,28 @@ export const JoinTeam: React.FC = () => {
         return colors[parseInt(id) % colors.length];
     };
 
+    const getUniversity = (id: string) => {
+        const unis = ['Orta Doğu Teknik Üniversitesi', 'İstanbul Teknik Üniversitesi', 'Hacettepe Üniversitesi', 'Boğaziçi Üniversitesi', 'Gazi Üniversitesi'];
+        return unis[parseInt(id) % unis.length];
+    }
+
+    const getTags = (area: string) => {
+        if (area.includes('Bilgisayar')) return ['Yazılım', 'AI/ML', 'Sağlık Bilimleri'];
+        if (area.includes('Elektrik')) return ['Mühendislik', 'IoT', 'Tarım'];
+        if (area.includes('Psikoloji')) return ['Sosyal Bilimler', 'Eğitim', 'İstatistik'];
+        if (area.includes('Biyoloji')) return ['Sağlık Bilimleri', 'Genetik', 'Laboratuvar'];
+        return ['Mühendislik', 'Lojistik', 'Analiz'];
+    }
+
     return (
         <div className="flex flex-col gap-8 pb-12">
             {/* Header */}
             <div className="flex flex-col gap-2">
                  <h1 className="text-3xl font-black text-gray-900 tracking-tight">Eşleşme Listesi</h1>
-                 <p className="text-gray-500 text-lg">Proje alanına göre takım arkadaşı arayan ekipler burada listelenir. Profillerini inceleyip iletişime geçebilirsin.</p>
+                 <p className="text-gray-500 text-lg">Proje alanına göre takım arkadaşı arayan öğrenciler burada listelenir. Profillerini inceleyip iletişime geçebilirsiniz.</p>
             </div>
 
-            {/* Filter Bar - Styled like image */}
+            {/* Filter Bar */}
             <div className="bg-white p-2 rounded-xl border border-gray-200 shadow-sm flex flex-col md:flex-row gap-2">
                  <div className="flex-1 flex items-center h-12 bg-gray-50 rounded-lg px-4 hover:bg-gray-100 transition-colors focus-within:ring-2 focus-within:ring-primary/20">
                      <span className="material-symbols-outlined text-gray-400">search</span>
@@ -151,15 +168,17 @@ export const JoinTeam: React.FC = () => {
 
                             {/* Card Header */}
                             <div className="flex items-start gap-4 mb-4 pr-8">
-                                <div className={`size-14 rounded-full flex items-center justify-center shrink-0 text-xl font-bold ${getRandomColor(team.id)}`}>
+                                <div className={`size-14 rounded-full flex items-center justify-center shrink-0 text-xl font-bold ${getRandomColor(team.id)} shadow-sm`}>
                                     {getInitials(team.name)}
                                 </div>
                                 <div>
-                                    <h3 className="font-bold text-gray-900 line-clamp-2 leading-tight mb-1">{team.name}</h3>
-                                    <p className="text-xs font-medium text-primary mb-0.5">{team.area}</p>
-                                    <p className="text-[10px] text-gray-400 uppercase tracking-wide">İstanbul Teknik Üniversitesi</p>
+                                    <h3 className="font-bold text-gray-900 leading-tight text-lg">{team.name}</h3>
+                                    <p className="text-sm font-bold text-primary mb-0.5">{team.area}</p>
+                                    <p className="text-[10px] text-gray-400 uppercase tracking-wide font-medium">{getUniversity(team.id)}</p>
                                 </div>
                             </div>
+
+                            <div className="h-px bg-gray-100 w-full mb-4"></div>
 
                             {/* Description */}
                             <p className="text-sm text-gray-600 leading-relaxed mb-6 line-clamp-3 flex-1">
@@ -168,15 +187,16 @@ export const JoinTeam: React.FC = () => {
 
                             {/* Tags */}
                             <div className="flex flex-wrap gap-2 mb-6">
-                                <span className="px-2.5 py-1 bg-red-50 text-red-700 rounded-md text-xs font-bold border border-red-100">{team.area}</span>
-                                <span className="px-2.5 py-1 bg-gray-50 text-gray-600 rounded-md text-xs font-bold border border-gray-100">Araştırma</span>
-                                {team.urgent && <span className="px-2.5 py-1 bg-yellow-50 text-yellow-700 rounded-md text-xs font-bold border border-yellow-100">Acil</span>}
+                                {getTags(team.area).map((tag, i) => (
+                                    <span key={i} className="px-2.5 py-1 bg-gray-50 text-gray-600 rounded-md text-xs font-bold border border-gray-100 hover:bg-gray-100 transition-colors cursor-default">{tag}</span>
+                                ))}
+                                {team.area.includes('Sağlık') && <span className="px-2.5 py-1 bg-red-50 text-red-700 rounded-md text-xs font-bold border border-red-100">Sağlık Bilimleri</span>}
                             </div>
 
                             {/* Buttons */}
                             <div className="flex gap-3 mt-auto">
                                 <button className="flex-1 h-10 border border-gray-200 rounded-lg text-sm font-bold text-gray-700 hover:bg-gray-50 transition-colors">
-                                    Detaylar
+                                    Profili Gör
                                 </button>
                                 <button 
                                     onClick={() => handleJoinRequest(team.id, team.name)}
@@ -198,7 +218,7 @@ export const JoinTeam: React.FC = () => {
                     </div>
                     <div>
                         <h3 className="font-bold text-gray-900 text-lg">Henüz Aradığını Bulamadın mı?</h3>
-                        <p className="text-sm text-gray-500 mt-2 max-w-[200px] mx-auto">Kendi ekibini oluşturarak diğer öğrencilerin seni bulmasını sağlayabilirsin.</p>
+                        <p className="text-sm text-gray-500 mt-2 max-w-[240px] mx-auto leading-relaxed">Kendi profilini oluşturarak diğer öğrencilerin seni bulmasını sağlayabilirsin.</p>
                     </div>
                     <button 
                         onClick={() => navigate('/create-team')}

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useToast } from '../components/ToastProvider';
 
@@ -6,14 +6,20 @@ export const Profile: React.FC = () => {
     const navigate = useNavigate();
     const { showToast } = useToast();
     const [isEditing, setIsEditing] = useState(false);
+    const fileInputRef = useRef<HTMLInputElement>(null);
     
-    const [profileData, setProfileData] = useState({
-        name: 'Ahmet Yılmaz',
-        department: 'Bilgisayar Mühendisliği, 3. Sınıf',
-        email: 'ahmet.yilmaz@univ.edu.tr',
-        university: 'İstanbul Teknik Üniversitesi',
-        phone: '+90 555 123 45 67',
-        about: 'Teknoloji ve tarım alanlarını birleştiren projeler üzerine çalışıyorum. IoT ve yapay zeka konularına ilgi duyuyorum. Takım çalışmasına yatkınım.'
+    // Initialize from localStorage currentUser with fallback defaults
+    const [profileData, setProfileData] = useState(() => {
+        const savedUser = JSON.parse(localStorage.getItem('currentUser') || '{}');
+        return {
+            name: savedUser.name || 'Ahmet Yılmaz',
+            department: savedUser.department || 'Bilgisayar Mühendisliği, 3. Sınıf',
+            email: savedUser.email || 'ahmet.yilmaz@univ.edu.tr',
+            university: savedUser.university || 'İstanbul Teknik Üniversitesi',
+            phone: savedUser.phone || '+90 555 123 45 67',
+            about: savedUser.about || 'Teknoloji ve tarım alanlarını birleştiren projeler üzerine çalışıyorum. IoT ve yapay zeka konularına ilgi duyuyorum. Takım çalışmasına yatkınım.',
+            avatarUrl: savedUser.avatarUrl || 'https://picsum.photos/200/200'
+        };
     });
 
     const [editForm, setEditForm] = useState(profileData);
@@ -32,11 +38,52 @@ export const Profile: React.FC = () => {
     const handleSave = () => {
         setProfileData(editForm);
         setIsEditing(false);
+        
+        // Persist changes to currentUser
+        const currentUser = JSON.parse(localStorage.getItem('currentUser') || '{}');
+        const updatedUser = { ...currentUser, ...editForm };
+        localStorage.setItem('currentUser', JSON.stringify(updatedUser));
+        
+        // Update users array if this user exists there (to persist across re-logins)
+        const users = JSON.parse(localStorage.getItem('users') || '[]');
+        const updatedUsers = users.map((u: any) => u.email === updatedUser.email ? updatedUser : u);
+        localStorage.setItem('users', JSON.stringify(updatedUsers));
+
         showToast('Profil bilgileri güncellendi.', 'success');
     };
 
     const handleChange = (field: keyof typeof profileData, value: string) => {
         setEditForm(prev => ({ ...prev, [field]: value }));
+    };
+
+    const handleImageUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
+        const file = event.target.files?.[0];
+        if (file) {
+            // Check file size (max 2MB)
+            if (file.size > 2 * 1024 * 1024) {
+                showToast('Dosya boyutu 2MB\'dan küçük olmalıdır.', 'error');
+                return;
+            }
+
+            const reader = new FileReader();
+            reader.onloadend = () => {
+                const result = reader.result as string;
+                setProfileData(prev => ({ ...prev, avatarUrl: result }));
+                setEditForm(prev => ({ ...prev, avatarUrl: result }));
+                
+                // Immediately save image to localStorage as well to update sidebar
+                const currentUser = JSON.parse(localStorage.getItem('currentUser') || '{}');
+                currentUser.avatarUrl = result;
+                localStorage.setItem('currentUser', JSON.stringify(currentUser));
+                
+                showToast('Profil fotoğrafı başarıyla güncellendi.', 'success');
+            };
+            reader.readAsDataURL(file);
+        }
+    };
+
+    const triggerFileInput = () => {
+        fileInputRef.current?.click();
     };
 
     return (
@@ -56,9 +103,23 @@ export const Profile: React.FC = () => {
                     <div className="bg-white rounded-3xl border border-gray-200 p-6 shadow-sm flex flex-col items-center text-center relative overflow-hidden">
                         <div className="absolute top-0 left-0 w-full h-32 bg-gradient-to-b from-primary/10 to-transparent"></div>
                         
-                        <div className="relative mb-4 mt-8">
-                            <div className="size-32 rounded-full border-4 border-white shadow-xl bg-gray-200 bg-cover bg-center" style={{ backgroundImage: 'url(https://picsum.photos/200/200)' }}></div>
-                            <button onClick={() => showToast("Fotoğraf yükleme özelliği yakında gelecek.", 'info')} className="absolute bottom-1 right-1 size-8 rounded-full bg-gray-900 text-white flex items-center justify-center hover:scale-110 transition-transform cursor-pointer border-2 border-white shadow-md">
+                        <div className="relative mb-4 mt-8 group">
+                            <div 
+                                className="size-32 rounded-full border-4 border-white shadow-xl bg-gray-200 bg-cover bg-center transition-transform duration-500 group-hover:scale-105" 
+                                style={{ backgroundImage: `url(${profileData.avatarUrl})` }}
+                            ></div>
+                            <input 
+                                type="file" 
+                                ref={fileInputRef} 
+                                onChange={handleImageUpload} 
+                                className="hidden" 
+                                accept="image/png, image/jpeg, image/jpg"
+                            />
+                            <button 
+                                onClick={triggerFileInput} 
+                                className="absolute bottom-1 right-1 size-9 rounded-full bg-gray-900 text-white flex items-center justify-center hover:bg-primary transition-colors cursor-pointer border-2 border-white shadow-md z-10"
+                                title="Fotoğrafı Değiştir"
+                            >
                                 <span className="material-symbols-outlined text-sm">edit</span>
                             </button>
                         </div>
@@ -91,9 +152,9 @@ export const Profile: React.FC = () => {
                             Rozetler
                         </h3>
                         <div className="flex flex-wrap gap-2">
-                             <div className="px-3 py-1 bg-yellow-50 text-yellow-700 rounded-full text-xs font-bold border border-yellow-100">Erken Başvuru</div>
-                             <div className="px-3 py-1 bg-blue-50 text-blue-700 rounded-full text-xs font-bold border border-blue-100">Ekip Lideri</div>
-                             <div className="px-3 py-1 bg-purple-50 text-purple-700 rounded-full text-xs font-bold border border-purple-100">Araştırmacı</div>
+                             <div className="px-3 py-1 bg-yellow-50 text-yellow-700 rounded-full text-xs font-bold border border-yellow-100 cursor-default hover:bg-yellow-100 transition-colors">Erken Başvuru</div>
+                             <div className="px-3 py-1 bg-blue-50 text-blue-700 rounded-full text-xs font-bold border border-blue-100 cursor-default hover:bg-blue-100 transition-colors">Ekip Lideri</div>
+                             <div className="px-3 py-1 bg-purple-50 text-purple-700 rounded-full text-xs font-bold border border-purple-100 cursor-default hover:bg-purple-100 transition-colors">Araştırmacı</div>
                         </div>
                     </div>
                 </div>
@@ -193,7 +254,7 @@ export const Profile: React.FC = () => {
                                  </div>
                                  <div>
                                      <p className="font-bold text-gray-900">Lisans Eğitimi</p>
-                                     <p className="text-sm text-gray-500">İstanbul Teknik Üniversitesi - Bilgisayar Mühendisliği</p>
+                                     <p className="text-sm text-gray-500">{profileData.university} - {profileData.department.split(',')[0]}</p>
                                      <p className="text-xs text-gray-400 mt-1">2021 - Devam Ediyor</p>
                                  </div>
                              </div>

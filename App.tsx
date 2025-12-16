@@ -2,6 +2,7 @@ import React from 'react';
 import { HashRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { Layout } from './components/Layout';
 import { Login } from './pages/Login';
+import { Register } from './pages/Register';
 import { Dashboard } from './pages/Dashboard';
 import { Applications } from './pages/Applications';
 import { JoinTeam } from './pages/JoinTeam';
@@ -19,6 +20,7 @@ const App: React.FC = () => {
             <Router>
                 <Routes>
                     <Route path="/" element={<Login />} />
+                    <Route path="/register" element={<Register />} />
                     
                     {/* Authenticated Routes */}
                     <Route element={<Layout />}>

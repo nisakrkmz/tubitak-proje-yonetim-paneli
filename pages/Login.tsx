@@ -1,20 +1,52 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useToast } from '../components/ToastProvider';
 
 export const Login: React.FC = () => {
   const navigate = useNavigate();
+  const { showToast } = useToast();
+  
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
 
-  // Optional: Clear auth on mount to ensure fresh login on root visit, 
-  // or remove this useEffect if you want to allow persistent sessions.
-  // Given the request "first page should be login", clearing it ensures they see login.
+  // Clear auth and current user on mount to ensure fresh login
   useEffect(() => {
       localStorage.removeItem('auth');
+      localStorage.removeItem('currentUser');
   }, []);
 
   const handleLogin = (e: React.FormEvent) => {
     e.preventDefault();
-    localStorage.setItem('auth', 'true');
-    navigate('/dashboard');
+    
+    // Default Demo credentials
+    const isDemoUser = email === 'ogrenci@universite.edu.tr' && password === '123456';
+    
+    // Check against registered users in localStorage
+    const existingUsers = JSON.parse(localStorage.getItem('users') || '[]');
+    const validUser = existingUsers.find((u: any) => u.email === email && u.password === password);
+
+    if (isDemoUser || validUser) {
+        localStorage.setItem('auth', 'true');
+        
+        if (validUser) {
+            // Store real user info
+            localStorage.setItem('currentUser', JSON.stringify(validUser));
+        } else {
+            // Store demo user info so dashboard works dynamically
+            localStorage.setItem('currentUser', JSON.stringify({
+                name: 'Ahmet Yılmaz',
+                email: 'ogrenci@universite.edu.tr',
+                university: 'İstanbul Teknik Üniversitesi',
+                department: 'Bilgisayar Mühendisliği',
+                role: 'Öğrenci'
+            }));
+        }
+
+        showToast('Giriş başarılı!', 'success');
+        navigate('/dashboard');
+    } else {
+        showToast('E-posta veya şifre hatalı.', 'error');
+    }
   };
 
   return (
@@ -34,7 +66,7 @@ export const Login: React.FC = () => {
 
           <div className="mb-8 flex gap-8 border-b border-gray-200">
             <button className="pb-4 text-base font-bold text-gray-900 border-b-2 border-primary transition-all">Giriş Yap</button>
-            <button className="pb-4 text-base font-bold text-gray-400 hover:text-gray-900 transition-all border-b-2 border-transparent hover:border-gray-300">Kayıt Ol</button>
+            <button onClick={() => navigate('/register')} className="pb-4 text-base font-bold text-gray-400 hover:text-gray-900 transition-all border-b-2 border-transparent hover:border-gray-300">Kayıt Ol</button>
           </div>
 
           <div className="space-y-6">
@@ -46,17 +78,29 @@ export const Login: React.FC = () => {
             <form onSubmit={handleLogin} className="space-y-4">
               <div className="space-y-2">
                 <label className="text-sm font-bold text-gray-700">E-posta Adresi</label>
-                <div className="relative">
-                  <span className="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-gray-400">mail</span>
-                  <input type="email" defaultValue="ogrenci@universite.edu.tr" className="w-full pl-12 pr-4 py-3 rounded-xl border border-gray-200 focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all bg-gray-50" />
+                <div className="relative group">
+                  <span className="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 group-focus-within:text-primary transition-colors">mail</span>
+                  <input 
+                    type="email" 
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    placeholder="ogrenci@universite.edu.tr" 
+                    className="w-full pl-12 pr-4 py-3 rounded-xl border border-gray-200 focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all bg-gray-50 focus:bg-white" 
+                  />
                 </div>
               </div>
 
               <div className="space-y-2">
                 <label className="text-sm font-bold text-gray-700">Şifre</label>
-                <div className="relative">
-                  <span className="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-gray-400">lock</span>
-                  <input type="password" defaultValue="123456" className="w-full pl-12 pr-4 py-3 rounded-xl border border-gray-200 focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all bg-gray-50" />
+                <div className="relative group">
+                  <span className="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 group-focus-within:text-primary transition-colors">lock</span>
+                  <input 
+                    type="password" 
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    placeholder="******" 
+                    className="w-full pl-12 pr-4 py-3 rounded-xl border border-gray-200 focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all bg-gray-50 focus:bg-white" 
+                  />
                 </div>
                 <div className="flex justify-end">
                     <button type="button" className="text-xs font-bold text-gray-500 hover:text-primary">Şifreni mi unuttun?</button>

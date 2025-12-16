@@ -3,12 +3,17 @@ import { useNavigate } from 'react-router-dom';
 
 export const Dashboard: React.FC = () => {
     const navigate = useNavigate();
+    
+    // Retrieve user from localStorage
+    const user = JSON.parse(localStorage.getItem('currentUser') || '{}');
+    // Get first name or default to 'Öğrenci'
+    const displayName = user.name ? user.name.split(' ')[0] : 'Öğrenci';
 
     return (
         <div className="flex flex-col gap-8 pb-10">
             {/* Welcome Section */}
             <div className="flex flex-col gap-2">
-                <h1 className="text-3xl font-black text-gray-900">Merhaba, Ahmet 👋</h1>
+                <h1 className="text-3xl font-black text-gray-900">Merhaba, {displayName} 👋</h1>
                 <p className="text-gray-500">Bugün projende ilerlemek için harika bir gün!</p>
             </div>
 
@@ -58,7 +63,7 @@ export const Dashboard: React.FC = () => {
                             <span className="text-gray-400 text-xs font-mono">#2209A-24-8821</span>
                         </div>
                         <h3 className="text-3xl font-black text-gray-900 mb-2">Akıllı Sulama Sistemi</h3>
-                        <p className="text-sm text-gray-500">Danışman: Dr. Öğr. Üyesi Ahmet Yılmaz</p>
+                        <p className="text-sm text-gray-500">Danışman: Dr. Öğr. Üyesi {user.name ? '...' : 'Ahmet Yılmaz'}</p>
                     </div>
 
                     <div className="space-y-4">

@@ -1,7 +1,9 @@
 import { GoogleGenAI } from "@google/genai";
 import { AIAnalysisResult } from "../types";
 
-const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
+// Note: In a production environment, never hardcode API keys. 
+// However, based on the user's explicit request to enable functionality immediately:
+const ai = new GoogleGenAI({ apiKey: process.env.API_KEY || 'AIzaSyBhVK5_NnMVoQmKrltERWMnYPvpwpniWkY' });
 
 export const generateProjectDraft = async (topic: string): Promise<{ title: string; summary: string; method: string }> => {
   try {
@@ -39,15 +41,20 @@ export const generateProjectDraft = async (topic: string): Promise<{ title: stri
 export const improveText = async (currentText: string, context: string): Promise<string> => {
   try {
      const model = 'gemini-2.5-flash';
+     // If current text is empty, generate new text based on context
+     const instruction = currentText 
+        ? `Improve the following text to be more academic, concise, and impactful.`
+        : `Generate a detailed academic text for this section based on the context.`;
+
     const prompt = `
       Act as an academic advisor for a student research project (TÜBİTAK 2209-A).
-      Improve the following text to be more academic, concise, and impactful.
+      ${instruction}
       Context: ${context}
       
-      Text to improve:
+      Text to process:
       "${currentText}"
       
-      Return ONLY the improved text.
+      Return ONLY the result text.
     `;
 
     const response = await ai.models.generateContent({
@@ -103,5 +110,29 @@ export const evaluateProposal = async (title: string, summary: string, method: s
             strengths: ["Konu güncel", "Amaç net"],
             weaknesses: ["Yöntem detaylandırılmalı", "Literatür eksiği olabilir"]
         };
+    }
+};
+
+export const generateProjectImage = async (prompt: string): Promise<string | null> => {
+    try {
+        const model = 'gemini-2.5-flash-image';
+        const response = await ai.models.generateContent({
+            model,
+            contents: {
+                parts: [
+                    { text: `Create a professional, scientific, abstract illustration for a research project about: ${prompt}. High quality, photorealistic, academic style. Do not include text in the image.` }
+                ]
+            }
+        });
+
+        for (const part of response.candidates[0].content.parts) {
+            if (part.inlineData) {
+                return `data:image/png;base64,${part.inlineData.data}`;
+            }
+        }
+        return null;
+    } catch (error) {
+        console.error("Error generating image:", error);
+        throw error;
     }
 };

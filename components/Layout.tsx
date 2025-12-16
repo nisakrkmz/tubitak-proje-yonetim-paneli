@@ -30,12 +30,21 @@ export const Layout: React.FC = () => {
     const navigate = useNavigate();
     const location = useLocation();
     const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+    const [user, setUser] = useState<any>(null);
 
     // Auth Check
     useEffect(() => {
         const auth = localStorage.getItem('auth');
         if (!auth) {
             navigate('/');
+        }
+        
+        const storedUser = localStorage.getItem('currentUser');
+        if (storedUser) {
+            setUser(JSON.parse(storedUser));
+        } else {
+            // Fallback for visual consistency if no user data found (shouldn't happen with auth)
+            setUser({ name: 'Ahmet Yılmaz', role: 'Öğrenci' });
         }
     }, [navigate]);
 
@@ -92,15 +101,19 @@ export const Layout: React.FC = () => {
                     {/* User */}
                     <div className="p-4 border-t border-gray-100">
                         <div onClick={() => navigate('/profile')} className="flex items-center gap-3 p-3 rounded-xl hover:bg-gray-50 transition-colors cursor-pointer">
-                            <div className="size-10 rounded-full bg-gray-200 bg-cover bg-center" style={{ backgroundImage: 'url(https://picsum.photos/100/100)' }}></div>
+                            <div 
+                                className="size-10 rounded-full bg-gray-200 bg-cover bg-center" 
+                                style={{ backgroundImage: `url(${user?.avatarUrl || 'https://picsum.photos/100/100'})` }}
+                            ></div>
                             <div className="flex-1 min-w-0">
-                                <p className="text-sm font-bold text-gray-900 truncate">Ahmet Yılmaz</p>
-                                <p className="text-xs text-gray-500 truncate">Öğrenci</p>
+                                <p className="text-sm font-bold text-gray-900 truncate">{user?.name}</p>
+                                <p className="text-xs text-gray-500 truncate">{user?.role || 'Öğrenci'}</p>
                             </div>
                             <button 
                                 onClick={(e) => { 
                                     e.stopPropagation(); 
                                     localStorage.removeItem('auth');
+                                    localStorage.removeItem('currentUser');
                                     navigate('/'); 
                                 }} 
                                 className="text-gray-400 hover:text-primary transition-colors"

@@ -17,6 +17,21 @@ export const Settings: React.FC = () => {
         }, 1000);
     };
 
+    const handlePasswordReset = () => {
+        showToast('E-posta adresinize şifre sıfırlama bağlantısı gönderildi.', 'success');
+    };
+
+    const handleDeleteAccount = () => {
+        if(confirm("DİKKAT! Hesabınızı silmek istediğinize emin misiniz? Bu işlem geri alınamaz.")) {
+            showToast('Hesap silme talebi alındı. Verileriniz temizleniyor...', 'info');
+            setTimeout(() => {
+                localStorage.removeItem('auth');
+                navigate('/');
+                showToast('Hesabınız başarıyla silindi.', 'success');
+            }, 2000);
+        }
+    };
+
     const handleToggle = (setting: string, val: boolean) => {
         showToast(`${setting} ${val ? 'aktif edildi' : 'devre dışı bırakıldı'}`, 'info');
     };
@@ -55,21 +70,21 @@ export const Settings: React.FC = () => {
                         </h2>
                     </div>
                     <div className="divide-y divide-gray-50">
-                        <button className="w-full flex items-center justify-between p-6 hover:bg-gray-50 transition-colors text-left">
+                        <button onClick={handlePasswordReset} className="w-full flex items-center justify-between p-6 hover:bg-gray-50 transition-colors text-left">
                             <div>
                                 <p className="font-medium text-gray-900">Şifre Değiştir</p>
                                 <p className="text-sm text-gray-500">Son değişiklik: 3 ay önce</p>
                             </div>
                             <span className="material-symbols-outlined text-gray-300">chevron_right</span>
                         </button>
-                        <button className="w-full flex items-center justify-between p-6 hover:bg-gray-50 transition-colors text-left">
+                        <button onClick={() => showToast("2FA zaten aktif durumda.", "info")} className="w-full flex items-center justify-between p-6 hover:bg-gray-50 transition-colors text-left">
                             <div>
                                 <p className="font-medium text-gray-900">İki Faktörlü Doğrulama</p>
                                 <p className="text-sm text-green-600 font-bold">Aktif</p>
                             </div>
                             <span className="material-symbols-outlined text-gray-300">chevron_right</span>
                         </button>
-                        <button className="w-full flex items-center justify-between p-6 hover:bg-gray-50 transition-colors text-left">
+                        <button onClick={() => showToast("Bağlı hesaplar yönetimi şu an devre dışı.", "info")} className="w-full flex items-center justify-between p-6 hover:bg-gray-50 transition-colors text-left">
                              <div>
                                 <p className="font-medium text-gray-900">Bağlı Hesaplar</p>
                                 <p className="text-sm text-gray-500">Google, LinkedIn</p>
@@ -130,7 +145,10 @@ export const Settings: React.FC = () => {
 
                 {/* Danger Zone */}
                 <div className="bg-white rounded-2xl border border-red-100 overflow-hidden shadow-sm">
-                    <button className="w-full flex items-center gap-3 p-6 hover:bg-red-50 transition-colors text-left group">
+                    <button 
+                        onClick={handleDeleteAccount}
+                        className="w-full flex items-center gap-3 p-6 hover:bg-red-50 transition-colors text-left group"
+                    >
                          <div className="size-10 rounded-full bg-red-100 text-red-600 flex items-center justify-center group-hover:bg-red-200 transition-colors">
                             <span className="material-symbols-outlined">delete_forever</span>
                          </div>

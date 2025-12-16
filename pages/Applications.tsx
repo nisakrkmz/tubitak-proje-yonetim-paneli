@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Application } from '../types';
 import { useNavigate } from 'react-router-dom';
 import { useToast } from '../components/ToastProvider';
@@ -97,8 +97,20 @@ export const Applications: React.FC = () => {
     const { showToast } = useToast();
     const [selectedApp, setSelectedApp] = useState<Application | null>(null);
     const [filter, setFilter] = useState<'All' | 'Pending' | 'InReview' | 'Approved' | 'Rejected'>('All');
+    const [applications, setApplications] = useState<Application[]>([]);
 
-    const filteredApps = MOCK_APPLICATIONS.filter(app => {
+    useEffect(() => {
+        const stored = localStorage.getItem('applications');
+        if (stored) {
+            setApplications(JSON.parse(stored));
+        } else {
+            // Initial Seed
+            localStorage.setItem('applications', JSON.stringify(MOCK_APPLICATIONS));
+            setApplications(MOCK_APPLICATIONS);
+        }
+    }, []);
+
+    const filteredApps = applications.filter(app => {
         if (filter === 'All') return true;
         if (filter === 'Pending') return app.status === 'Pending';
         if (filter === 'InReview') return app.status === 'InReview';
@@ -175,31 +187,39 @@ export const Applications: React.FC = () => {
                             </tr>
                         </thead>
                         <tbody className="divide-y divide-gray-100">
-                            {filteredApps.map((app) => (
-                                <tr key={app.id} onClick={() => setSelectedApp(app)} className="hover:bg-gray-50 cursor-pointer transition-colors group">
-                                    <td className="px-6 py-4">
-                                        <div className="flex items-center">
-                                            <div className="mr-3">
-                                                <ProjectIcon area={app.area} />
-                                            </div>
-                                            <div>
-                                                <div className="font-bold text-gray-900">{app.projectTitle}</div>
-                                                <div className="text-xs text-gray-500">{app.refNo}</div>
-                                            </div>
-                                        </div>
-                                    </td>
-                                    <td className="px-6 py-4 text-sm text-gray-600">{app.area}</td>
-                                    <td className="px-6 py-4 text-sm text-gray-600">{app.teamName}</td>
-                                    <td className="px-6 py-4 text-sm text-gray-600">{app.submissionDate}</td>
-                                    <td className="px-6 py-4">
-                                        <StatusBadge app={app} />
-                                    </td>
-                                    <td className="px-6 py-4 text-sm text-gray-500 max-w-[200px] truncate">{app.feedback}</td>
-                                    <td className="px-6 py-4 text-right">
-                                        <span className="material-symbols-outlined text-gray-300 group-hover:text-primary transition-colors">chevron_right</span>
+                            {filteredApps.length === 0 ? (
+                                <tr>
+                                    <td colSpan={7} className="px-6 py-12 text-center text-gray-500">
+                                        Bu filtrede henüz bir başvuru bulunmamaktadır.
                                     </td>
                                 </tr>
-                            ))}
+                            ) : (
+                                filteredApps.map((app) => (
+                                    <tr key={app.id} onClick={() => setSelectedApp(app)} className="hover:bg-gray-50 cursor-pointer transition-colors group">
+                                        <td className="px-6 py-4">
+                                            <div className="flex items-center">
+                                                <div className="mr-3">
+                                                    <ProjectIcon area={app.area} />
+                                                </div>
+                                                <div>
+                                                    <div className="font-bold text-gray-900">{app.projectTitle}</div>
+                                                    <div className="text-xs text-gray-500">{app.refNo}</div>
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td className="px-6 py-4 text-sm text-gray-600">{app.area}</td>
+                                        <td className="px-6 py-4 text-sm text-gray-600">{app.teamName}</td>
+                                        <td className="px-6 py-4 text-sm text-gray-600">{app.submissionDate}</td>
+                                        <td className="px-6 py-4">
+                                            <StatusBadge app={app} />
+                                        </td>
+                                        <td className="px-6 py-4 text-sm text-gray-500 max-w-[200px] truncate">{app.feedback}</td>
+                                        <td className="px-6 py-4 text-right">
+                                            <span className="material-symbols-outlined text-gray-300 group-hover:text-primary transition-colors">chevron_right</span>
+                                        </td>
+                                    </tr>
+                                ))
+                            )}
                         </tbody>
                     </table>
                 </div>
@@ -281,7 +301,7 @@ export const Applications: React.FC = () => {
                                 <div className="flex flex-col gap-4 pl-2">
                                     <div className="relative pl-6 border-l-2 border-green-500">
                                         <div className="absolute -left-[5px] top-0 size-2.5 rounded-full bg-green-500 ring-4 ring-white"></div>
-                                        <p className="text-xs text-gray-400">12.10.2023 - 14:30</p>
+                                        <p className="text-xs text-gray-400">{selectedApp.submissionDate} - 14:30</p>
                                         <p className="text-sm font-bold text-gray-900">Başvuru Sisteme Yüklendi</p>
                                     </div>
                                     <div className="relative pl-6 border-l-2 border-green-500">
