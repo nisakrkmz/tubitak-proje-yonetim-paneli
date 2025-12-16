@@ -7,7 +7,7 @@ View your app in AI Studio: https://ai.studio/apps/drive/1mZt3gLZQR8yMfF2ZgWnopT
 
 ## 🚀 Proje Hakkında
 
-Bu proje, **TÜBİTAK 2209-A Üniversite Öğrencileri Araştırma Projeleri Destekleme Programı**'na başvuracak öğrenciler için geliştirilmiş kapsamlı bir yönetim sistemidir.  
+Bu proje, **TÜBİTAK 2209-A Üniversite Öğrencileri Araştırma Projeleri Destekleme Programı**'na başvuracak öğrenciler için ekip arkadaşlarım Azra Ateşoğlu ve Zeynep Yardımcı ile birlikte geliştirilen kapsamlı bir yönetim sistemidir.  
 Öğrencilerin en çok zorlandığı **akademik dil kullanımı**, **proje kurgusu** ve **ekip bulma** gibi konulara modern ve yapay zeka destekli çözümler sunar.
 
 Google'ın en yeni **Gemini 2.5 Flash** modelleri kullanılarak, öğrencilere **sanal bir akademik danışmanlık** deneyimi sağlanır.
