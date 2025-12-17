@@ -1,9 +1,9 @@
 import { GoogleGenAI } from "@google/genai";
 import { AIAnalysisResult } from "../types";
 
-// Note: In a production environment, never hardcode API keys. 
-// However, based on the user's explicit request to enable functionality immediately:
-const ai = new GoogleGenAI({ apiKey: process.env.API_KEY || 'AIzaSyBhVK5_NnMVoQmKrltERWMnYPvpwpniWkY' });
+// Security Update: API Key is now exclusively retrieved from environment variables.
+// Do not hardcode API keys in the source code.
+const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
 
 export const generateProjectDraft = async (topic: string): Promise<{ title: string; summary: string; method: string }> => {
   try {
